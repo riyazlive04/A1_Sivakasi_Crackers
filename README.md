@@ -2,18 +2,18 @@
 
 This n8n workflow automates monthly WhatsApp payment reminders using Evolution API.
 
-The automation runs on the 1st, 3rd, 5th, 7th, and 9th of every month, reads customer payment status from Google Sheets, calculates monthly installment amounts, and sends polite reminder messages only to customers with pending payments.
+⚠️ Important: Evolution API is an **unofficial WhatsApp API**. It does **not use WhatsApp Cloud API** and has **no WhatsApp conversation charges**. Messages are sent via a linked WhatsApp device.
 
-Messages are sent in a scheduled manner with delays to avoid spam and WhatsApp rate limits. The workflow supports primary and secondary phone numbers and handles errors gracefully.
+The workflow runs on the 1st of every month, reads customer payment status from Google Sheets, calculates monthly installment amounts, and sends scheduled reminder messages only to customers with pending payments.
 
 ## Requirements
 - n8n (self-hosted or cloud)
-- Evolution API
+- Evolution API (unofficial, device-based)
 - Google Sheets (customer & payment data)
-- WhatsApp device linked to Evolution API
+- WhatsApp account linked via Evolution API
 
 ## WhatsApp Device Setup (Required)
-Before using this workflow, link your WhatsApp device here:
+Link your WhatsApp device here:
 https://message.sirahagents.com/manager/
 
 ## Features
@@ -21,7 +21,7 @@ https://message.sirahagents.com/manager/
 - Dynamic month detection
 - Google Sheets integration
 - Automatic installment calculation
-- WhatsApp reminders via Evolution API
+- WhatsApp reminders with no conversation cost
 - Delay control & batching
 - Error handling and logging
 
@@ -31,4 +31,4 @@ https://message.sirahagents.com/manager/
 3. Link your WhatsApp device using Evolution API
 4. Activate the workflow
 
-This workflow is ideal for scheme-based, installment, or subscription businesses.
+Best suited for scheme-based, installment, and subscription businesses.
