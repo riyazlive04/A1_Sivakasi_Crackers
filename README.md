@@ -13,22 +13,24 @@ The workflow runs on the 1st of every month, reads customer payment status from 
 - WhatsApp account linked via Evolution API
 
 ## WhatsApp Device Setup (Required)
-Link your WhatsApp device here:
+Link your WhatsApp device here:  
 https://message.sirahagents.com/manager/
+
+For setup support, contact: **+91 9789961631**
 
 ## Features
 - Monthly scheduled trigger
 - Dynamic month detection
 - Google Sheets integration
 - Automatic installment calculation
-- WhatsApp reminders with no conversation cost
+- WhatsApp reminders with zero conversation cost
 - Delay control & batching
 - Error handling and logging
 
 ## Usage
-1. Import the JSON into n8n
-2. Connect Google Sheets credentials
-3. Link your WhatsApp device using Evolution API
-4. Activate the workflow
+1. Import the JSON into n8n  
+2. Connect Google Sheets credentials  
+3. Link your WhatsApp device using Evolution API  
+4. Activate the workflow  
 
 Best suited for scheme-based, installment, and subscription businesses.
