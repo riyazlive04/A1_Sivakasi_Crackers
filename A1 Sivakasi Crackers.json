@@ -1,0 +1,475 @@
+{
+  "name": "A1 Sivakasi Crackers",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 4 1 * *"
+            }
+          ]
+        }
+      },
+      "id": "cc4a98aa-0f69-4430-be6f-f857f190261d",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2112,
+        -448
+      ],
+      "notes": "Runs on 1st of every month at 4:30 AM Berlin (9 AM IST)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst currentMonth = now.getMonth();\n\nconst monthMapping = [\n  { month: 10, name: 'November', column: 'I' },\n  { month: 11, name: 'December', column: 'J' },\n  { month: 0, name: 'January', column: 'K' },\n  { month: 1, name: 'Febraury', column: 'L' },\n  { month: 2, name: 'March', column: 'M' },\n  { month: 3, name: 'April', column: 'N' },\n  { month: 4, name: 'May', column: 'O' },\n  { month: 5, name: 'June', column: 'P' },\n  { month: 6, name: 'July', column: 'Q' },\n  { month: 7, name: 'August', column: 'R' },\n  { month: 8, name: 'September', column: 'S' }\n];\n\nconst currentMonthConfig = monthMapping.find(m => m.month === currentMonth);\n\nif (!currentMonthConfig) {\n  console.log('Month not in payment schedule');\n  return [{ json: { \n    status: 'skip',\n    message: 'Current month not in payment schedule'\n  }}];\n}\n\nconsole.log('=== WORKFLOW INITIALIZED ===');\nconsole.log('Month:', currentMonthConfig.name);\nconsole.log('Column:', currentMonthConfig.column);\nconsole.log('Days: 1, 2, 3, 4, 5');\n\nreturn [{ json: {\n  status: 'proceed',\n  monthName: currentMonthConfig.name,\n  monthColumn: currentMonthConfig.column,\n  messageDays: [1, 2, 3, 4, 5]\n}}];"
+      },
+      "id": "019065db-ba67-442e-9f09-4f88369545d8",
+      "name": "Initialize Current Month",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1888,
+        -448
+      ],
+      "notes": "Determines which month column to check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.status}}",
+              "value2": "proceed"
+            }
+          ]
+        }
+      },
+      "id": "251ed2db-5485-4b4f-8961-7c42c6e98313",
+      "name": "Valid Payment Month?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1664,
+        -448
+      ],
+      "notes": "Only proceed if month is in schedule"
+    },
+    {
+      "parameters": {
+        "functionCode": "const monthName = $input.first().json.monthName;\nconst monthColumn = $input.first().json.monthColumn;\nconst days = [1, 2, 3, 4, 5];\nconst items = [];\n\nfor (const day of days) {\n  items.push({\n    json: {\n      dayNumber: day,\n      monthName: monthName,\n      monthColumn: monthColumn\n    }\n  });\n}\n\nconsole.log('Created 5 day items:', days.join(', '));\nreturn items;"
+      },
+      "id": "1a016583-8fce-4abe-be94-ab2d016fd3cb",
+      "name": "Split Into Days",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -1440,
+        -464
+      ],
+      "notes": "Creates 5 items for days 1, 3, 5, 7, 9"
+    },
+    {
+      "parameters": {
+        "amount": "={{$json.dayNumber - 1}}",
+        "unit": "days"
+      },
+      "id": "fc8b67d9-f6bb-4c8b-9295-ddc5e9471615",
+      "name": "Wait Between Days",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -1216,
+        -448
+      ],
+      "webhookId": "wait-days-webhook",
+      "notes": "0 days for day 1, then 1 day between each"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_zO7QZC4bcxppaPTX3A_JJLEB3yW0vr7HxGWi9GI4do",
+          "mode": "list",
+          "cachedResultName": "25 and 26 Ckers Customer ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_zO7QZC4bcxppaPTX3A_JJLEB3yW0vr7HxGWi9GI4do/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1218161368,
+          "mode": "list",
+          "cachedResultName": "Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_zO7QZC4bcxppaPTX3A_JJLEB3yW0vr7HxGWi9GI4do/edit#gid=1218161368"
+        },
+        "options": {}
+      },
+      "id": "8fdf14de-2068-4b14-bf44-47205e0f4234",
+      "name": "Read Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -992,
+        -448
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "j7LQHzChRtE52CkK",
+          "name": "riyaz.livechat - Google Sheets"
+        }
+      },
+      "notes": "Reads fresh data for each day"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get month configuration from previous node\nconst monthName = $('Split Into Days').item.json.monthName;\nconst monthColumn = $('Split Into Days').item.json.monthColumn;\nconst currentDay = $('Split Into Days').item.json.dayNumber;\n\n// ==============================================\n// HELPER FUNCTIONS\n// ==============================================\n\nfunction getPhoneNumber(row) {\n  const possibleKeys = [\n    'Number', 'Number ', 'number', 'number ',\n    'Phone', 'Phone ', 'phone', 'phone ',\n    'Phone Number', 'Phone Number ', 'Mobile', 'Mobile ', 'mobile', 'mobile '\n  ];\n  \n  for (const key of possibleKeys) {\n    if (row[key] !== undefined && row[key] !== null && String(row[key]).trim() !== '') {\n      return String(row[key]).trim();\n    }\n  }\n  \n  return null;\n}\n\nfunction cleanPhoneNumber(number) {\n  if (!number) return null;\n  \n  let cleaned = String(number).replace(/\\D/g, '');\n  \n  if (cleaned.length < 10) return null;\n  \n  if (cleaned.startsWith('0')) {\n    cleaned = '91' + cleaned.substring(1);\n  }\n  \n  if (!cleaned.startsWith('91') && cleaned.length === 10) {\n    cleaned = '91' + cleaned;\n  }\n  \n  return cleaned;\n}\n\nfunction calculateMonthlyPayment(scheme, value) {\n  try {\n    const schemeNum = parseFloat(scheme);\n    const valueNum = parseFloat(value);\n    if (isNaN(schemeNum) || isNaN(valueNum) || schemeNum === 0) return 0;\n    return Math.round(valueNum / schemeNum);\n  } catch (error) {\n    return 0;\n  }\n}\n\nfunction getRowValue(row, ...keys) {\n  for (const key of keys) {\n    if (row[key] !== undefined && row[key] !== null) return row[key];\n    if (row[key + ' '] !== undefined && row[key + ' '] !== null) return row[key + ' '];\n  }\n  return null;\n}\n\n// Find the month column by matching month name (handles typos and trailing spaces)\nfunction getMonthPaymentStatus(row, monthName, monthColumn) {\n  // Normalize function to handle typos and spaces\n  const normalizeMonth = (str) => {\n    return String(str).toLowerCase().replace(/[^a-z]/g, '');\n  };\n  \n  const normalizedSearchTerm = normalizeMonth(monthName);\n  \n  // Strategy 1: Try exact match with monthName (with and without trailing space)\n  if (row[monthName] !== undefined && row[monthName] !== null) {\n    return row[monthName];\n  }\n  if (row[monthName + ' '] !== undefined && row[monthName + ' '] !== null) {\n    return row[monthName + ' '];\n  }\n  \n  // Strategy 2: Search through all keys to find matching month (handles typos like \"Febraury\")\n  for (const key of Object.keys(row)) {\n    const normalizedKey = normalizeMonth(key);\n    \n    // Check if the month names match (handles typos and spaces)\n    if (normalizedKey === normalizedSearchTerm) {\n      return row[key];\n    }\n  }\n  \n  // Strategy 3: If monthColumn is provided (like \"L\"), try to use it\n  if (monthColumn && row[monthColumn] !== undefined && row[monthColumn] !== null) {\n    return row[monthColumn];\n  }\n  \n  return null;\n}\n\n// ==============================================\n// MAIN PROCESSING LOGIC\n// ==============================================\n\nconst customersToMessage = [];\nconst errors = [];\nlet processedRows = 0;\nlet skippedRows = 0;\nlet totalMessages = 0;\n\nconst allItems = $input.all();\n\n// Debug logging\nif (allItems.length > 0) {\n  console.log('=== CONFIGURATION ===');\n  console.log('Month Name:', monthName);\n  console.log('Month Column:', monthColumn);\n  console.log('Current Day:', currentDay);\n  \n  const firstRow = allItems[0].json;\n  console.log('\\n=== MONTH COLUMNS IN DATA ===');\n  const columns = Object.keys(firstRow);\n  columns.filter(col => \n    col.toLowerCase().includes('january') ||\n    col.toLowerCase().includes('february') ||\n    col.toLowerCase().includes('febraury') ||\n    col.toLowerCase().includes('march') ||\n    col.toLowerCase().includes('april') ||\n    col.toLowerCase().includes('may') ||\n    col.toLowerCase().includes('june') ||\n    col.toLowerCase().includes('july') ||\n    col.toLowerCase().includes('august') ||\n    col.toLowerCase().includes('september') ||\n    col.toLowerCase().includes('october') ||\n    col.toLowerCase().includes('november') ||\n    col.toLowerCase().includes('december')\n  ).forEach(col => {\n    console.log(`  \"${col}\": \"${firstRow[col]}\"`);\n  });\n}\n\n// Process each row\nfor (const item of allItems) {\n  try {\n    const row = item.json;\n    const rowIndex = row.row_number || (item.index + 2);\n    \n    const receiptNo = getRowValue(row, 'Receipt No');\n    const scheme = getRowValue(row, 'Scheme');\n    const value = getRowValue(row, 'Value');\n    const name = getRowValue(row, 'Name');\n    const number = getPhoneNumber(row);\n    const secondaryNumber = getRowValue(row, 'Secondary Number') || '';\n    const type = getRowValue(row, 'Type') || '12 Months';\n    const district = getRowValue(row, 'District');\n    \n    // Get payment status for current month\n    let currentMonthPaymentStatus = getMonthPaymentStatus(row, monthName, monthColumn);\n    \n    // Normalize the status value\n    // If the value is null, undefined, or empty string, set to \"Empty\"\n    // Otherwise, trim and use the actual value (including \"Completed\")\n    const actualStatus = currentMonthPaymentStatus === undefined || \n                        currentMonthPaymentStatus === null || \n                        String(currentMonthPaymentStatus).trim() === '' \n                        ? 'Empty' \n                        : String(currentMonthPaymentStatus).trim();\n    \n    // Debug logging\n    if (rowIndex <= 5) {\n      console.log(`\\nRow ${rowIndex} - ${name}:`);\n      console.log(`  Month column value: \"${currentMonthPaymentStatus}\"`);\n      console.log(`  Final status: \"${actualStatus}\"`);\n    }\n    \n    // Validate data\n    const trimmedName = name ? String(name).trim() : null;\n    if (!trimmedName || trimmedName === '') {\n      skippedRows++;\n      errors.push({ row: rowIndex, error: 'Missing name', data: { name: row['Name'], number }});\n      continue;\n    }\n    \n    if (!number || number === '') {\n      skippedRows++;\n      errors.push({ row: rowIndex, error: 'Missing phone number', data: { name: trimmedName, number }});\n      continue;\n    }\n    \n    if (!scheme || !value) {\n      skippedRows++;\n      errors.push({ row: rowIndex, error: 'Missing scheme or value', data: { name: trimmedName, scheme, value }});\n      continue;\n    }\n    \n    const cleanedNumber = cleanPhoneNumber(number);\n    if (!cleanedNumber || cleanedNumber.length < 10) {\n      skippedRows++;\n      errors.push({ row: rowIndex, error: 'Invalid phone number', data: { name: trimmedName, number, cleaned: cleanedNumber }});\n      continue;\n    }\n    \n    const monthlyAmount = calculateMonthlyPayment(scheme, value);\n    if (monthlyAmount === 0) {\n      skippedRows++;\n      errors.push({ row: rowIndex, error: 'Cannot calculate amount', data: { name: trimmedName, scheme, value }});\n      continue;\n    }\n    \n    const cleanedSecondaryNumber = secondaryNumber && String(secondaryNumber).trim() !== '' \n      ? cleanPhoneNumber(secondaryNumber) \n      : '';\n    \n    const baseCustomerData = {\n      Scheme: scheme,\n      Value: value,\n      Name: trimmedName,\n      receiptNo: receiptNo || 'N/A',\n      type: type,\n      district: district ? String(district).trim() : 'N/A',\n      amount: monthlyAmount,\n      monthName: monthName,\n      monthColumn: monthColumn,\n      currentPaymentStatus: actualStatus,\n      rowNumber: rowIndex,\n      messageDay: currentDay,\n      timestamp: new Date().toISOString()\n    };\n    \n    customersToMessage.push({\n      ...baseCustomerData,\n      Number: cleanedNumber,\n      numberType: 'primary'\n    });\n    totalMessages++;\n    \n    if (cleanedSecondaryNumber && cleanedSecondaryNumber.length >= 10) {\n      customersToMessage.push({\n        ...baseCustomerData,\n        Number: cleanedSecondaryNumber,\n        numberType: 'secondary'\n      });\n      totalMessages++;\n    }\n    \n    processedRows++;\n    \n  } catch (error) {\n    skippedRows++;\n    errors.push({ row: item.index + 2, error: 'Processing error: ' + error.message, stack: error.stack });\n  }\n}\n\n// Summary logging\nconsole.log('\\n=== PROCESSING SUMMARY ===');\nconsole.log(`Day: ${currentDay} | Month: ${monthName}`);\nconsole.log(`Processed: ${processedRows}`);\nconsole.log(`Total Messages: ${totalMessages}`);\nconsole.log(`Errors/Skipped: ${skippedRows}`);\nconsole.log(`To Message: ${customersToMessage.length}`);\n\nif (errors.length > 0) {\n  console.log('\\n=== ERRORS (First 5) ===');\n  errors.slice(0, 5).forEach(err => {\n    console.log(`Row ${err.row}: ${err.error}`);\n    if (err.data) console.log(`  Data: ${JSON.stringify(err.data)}`);\n  });\n  if (errors.length > 5) {\n    console.log(`... and ${errors.length - 5} more errors`);\n  }\n}\n\nif (customersToMessage.length > 0) {\n  console.log('\\n=== CUSTOMERS TO MESSAGE (First 5) ===');\n  customersToMessage.slice(0, 5).forEach(c => {\n    console.log(`- ${c.Name} (Receipt: ${c.receiptNo}) - ${c.numberType}`);\n    console.log(`  Number: ${c.Number}`);\n    console.log(`  Amount: ₹${c.amount}`);\n    console.log(`  Status: ${c.currentPaymentStatus}`);\n  });\n}\n\n// Return data\nif (customersToMessage.length === 0) {\n  return [{ json: { \n    status: 'no_pending',\n    monthName: monthName,\n    messageDay: currentDay,\n    processedRows: processedRows,\n    skippedRows: skippedRows,\n    errors: errors\n  }}];\n}\n\nreturn customersToMessage.map(customer => ({ json: customer }));"
+      },
+      "id": "49af95fc-119c-4940-9635-3f67d11f38f6",
+      "name": "Process Payments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        -448
+      ],
+      "notes": "Processes current month and outputs all customer details"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.currentPaymentStatus }}",
+              "operation": "notEqual",
+              "value2": "=Completed"
+            }
+          ]
+        }
+      },
+      "id": "6c11a20c-c0bf-43dc-b0ff-6b1ddd080a51",
+      "name": "Has Customers?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -448
+      ],
+      "notes": "Checks if there are customers to message"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "message",
+              "value": "=📢 Reminder: {{$json.monthName}} Payment Due.\n\nDear {{ $json.Name }},\nHope you're doing well! This is a gentle reminder that your monthly payment of ₹{{ $json.Scheme }} for the A1 Sivakasi Crackers Scheme is due.\n\nKindly make the payment at your earliest convenience via GPay{{$json.messageDay === 4 || $json.messageDay === 5 ? ' (8428548998)' : ''}} to ensure continuity in the scheme.\n\nIf you have already made the payment, please ignore this message. Let us know if you need any assistance."
+            },
+            {
+              "name": "phoneNumber",
+              "value": "={{ $json.Number }}"
+            },
+            {
+              "name": "cellReference",
+              "value": "={{$json.monthColumn}}{{$json.rowNumber}}"
+            },
+            {
+              "name": "customerName",
+              "value": "={{$json.Name}}"
+            },
+            {
+              "name": "receiptNo",
+              "value": "={{$json.receiptNo}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c497aec8-9dae-45ce-ad26-4e753f82915b",
+      "name": "Prepare Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        -624
+      ],
+      "notes": "Formats WhatsApp message with customer details"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.error}}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "id": "95801bf1-ed28-4b4f-9228-b2b3fcf39d9a",
+      "name": "Message Sent?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -544
+      ],
+      "notes": "Verifies message was sent successfully"
+    },
+    {
+      "parameters": {
+        "functionCode": "const day = $('Split Into Days').item.json.dayNumber;\nconst month = $('Split Into Days').item.json.monthName;\nconsole.log(`Day ${day} completed for ${month}`);\nreturn [{ json: { status: 'day_complete', day, month }}];"
+      },
+      "id": "4587eee2-d0e4-4a8e-a773-2c6382019738",
+      "name": "Log Day Summary",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -304
+      ],
+      "notes": "Logs summary when no customers to message"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "A1 Sivakasi Crackers",
+        "remoteJid": "={{ $json.Number }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api-english.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -624
+      ],
+      "id": "2d9d6173-0728-49a0-bec8-099e6c500152",
+      "name": "Send text1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "JK1VBraDt4SZv4hE",
+          "name": "Sirah Agents"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 25,
+        "unit": "seconds"
+      },
+      "id": "5e6f4d7f-c51a-4378-8e0a-45992465a092",
+      "name": "Wait Before Send",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        128,
+        -624
+      ],
+      "webhookId": "wait-before-send-webhook",
+      "notes": "Wait 10 seconds before sending each message to ensure sequential delivery"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "4bddd75c-2401-42aa-b535-90a5bb7edfbc",
+      "name": "Split In Batches1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -320,
+        -544
+      ],
+      "notes": "Process customers one by one with 10 second delay between each"
+    },
+    {
+      "parameters": {
+        "content": "This is the final workflow for A1 carackers sicakasi\n",
+        "height": 592,
+        "width": 3072
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2240,
+        -720
+      ],
+      "typeVersion": 1,
+      "id": "457a741a-3ae1-4d81-810b-3109dd3d41c1",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Initialize Current Month",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Current Month": {
+      "main": [
+        [
+          {
+            "node": "Valid Payment Month?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid Payment Month?": {
+      "main": [
+        [
+          {
+            "node": "Split Into Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Days": {
+      "main": [
+        [
+          {
+            "node": "Wait Between Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Between Days": {
+      "main": [
+        [
+          {
+            "node": "Read Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Process Payments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Payments": {
+      "main": [
+        [
+          {
+            "node": "Has Customers?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Customers?": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log Day Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Message": {
+      "main": [
+        [
+          {
+            "node": "Wait Before Send",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Sent?": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split In Batches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send text1": {
+      "main": [
+        [
+          {
+            "node": "Message Sent?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Before Send": {
+      "main": [
+        [
+          {
+            "node": "Send text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Prepare Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "f2684e45-b6c8-47d7-9d9a-74acf209e2d8",
+  "meta": {
+    "instanceId": "321cedf60d4c598b428d3e59326887b97112a12c3b89933ba6d55156c284c6c9"
+  },
+  "id": "4WYebxhpgve4Hetx",
+  "tags": []
+}
